@@ -1,0 +1,48 @@
+---
+title: "BioC/R Meetup May 2018 examples"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## `matter` setup
+
+```{r}
+library(matter)
+```
+
+## 'processed' imzML examples
+
+```{r message=FALSE}
+library(Cardinal)
+
+filename <- paste0("~/Documents/Datasets/PRIDE/",
+                            "HR2MSI mouse urinary bladder S096/",
+                            "HR2MSI mouse urinary bladder S096.imzML")
+
+mouse <- readMSIData(filename, attach.only=TRUE)
+
+image(mouse,
+      mz=c(741.5307, 743.5482, 798.541),
+      plusminus=0.1,
+      col=c("blue", "red", "green"),
+      normalize.image="linear",
+      contrast.enhance="suppression",
+      key=TRUE, superpose=TRUE)
+```
+
+```{r}
+spectra(mouse)
+
+atomdata(spectra(mouse))
+
+head(atomdata(spectra(mouse))$keys[[1]]) # m/z values
+head(atomdata(spectra(mouse))$values[[1]]) # intensities
+
+head(atomdata(spectra(mouse))$keys[[2]]) # m/z values
+head(atomdata(spectra(mouse))$values[[2]]) # intensities
+```
+
+

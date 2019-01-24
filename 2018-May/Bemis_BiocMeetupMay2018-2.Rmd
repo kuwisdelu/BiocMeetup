@@ -1,0 +1,66 @@
+---
+title: "BioC/R Meetup May 2018 examples"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## `matter` setup
+
+```{r}
+library(matter)
+```
+
+## fastq examples
+
+```{r results='hide'}
+setClass("Fastq", slots=c(
+	id = "matter_str",
+	sread = "matter_str",
+	quality = "matter_str"))
+
+setGeneric("id", function(x) standardGeneric("id"))
+setGeneric("sread", function(object, ...) standardGeneric("sread"))
+setGeneric("quality", function(object, ...) standardGeneric("quality"))
+
+setMethod("id", "Fastq", function(x) x@id)
+setMethod("sread", "Fastq", function(object) object@sread)
+setMethod("quality", "Fastq", function(object) object@quality)
+```
+
+```{r}
+parseFastq <- function(file) {
+	length <- file.info(file)$size
+	raw <- matter_vec(paths=file, length=length, datamode="raw")
+	newlines <- which(raw == charToRaw('\n')) # parses the file in chunks
+	if ( newlines[length(newlines)] == length )
+		newlines <- newlines[-length(newlines)]
+	byte_start <- c(0L, newlines)
+	byte_end <- c(newlines, length) - 1L # don't include the '\n'
+	line_offset <- byte_start
+	line_extent <- byte_end - byte_start
+	id <- matter_str(paths=file,
+		offset=1L + line_offset[c(TRUE,FALSE,FALSE,FALSE)], # skip the '@'
+		extent=line_extent[c(TRUE,FALSE,FALSE,FALSE)] - 1L) # adjust for '@'
+	sread <- matter_str(paths=file,
+		offset=line_offset[c(FALSE,TRUE,FALSE,FALSE)],
+		extent=line_extent[c(FALSE,TRUE,FALSE,FALSE)])
+	quality <- matter_str(paths=file,
+		offset=line_offset[c(FALSE,FALSE,FALSE,TRUE)],
+		extent=line_extent[c(FALSE,FALSE,FALSE,TRUE)])
+	new("Fastq", id=id, sread=sread, quality=quality)
+}
+```
+
+
+```{r}
+path <- "~/Documents/Datasets/Test-Data/fastq-example/ERR127302_1_subset.fastq"
+fq1 <- parseFastq(path)
+sread(fq1)
+head(id(fq1))
+head(sread(fq1))
+head(quality(fq1))
+```
+

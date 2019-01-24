@@ -1,0 +1,80 @@
+---
+title: "BioC/R Meetup May 2018 examples"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## `matter` setup
+
+```{r}
+library(matter)
+```
+
+## `matter` examples
+
+```{r}
+x <- matter(1:10)
+x
+x[]
+atomdata(x)
+```
+
+```{r}
+y <- matter(11:20)
+y
+y[]
+atomdata(y)
+```
+
+```{r}
+z <- c(x, y)
+z
+z[]
+atomdata(z)
+```
+
+```{r}
+A <- rbind(z, c(y, x))
+A
+A[]
+atomdata(A)
+```
+
+```{r}
+sizeof_int <- 4
+B <- matter_mat(datamode="int",
+                nrow=2, ncol=5,
+                paths=c(paths(x)[1], paths(y)[1]),
+                offset=c(5 * sizeof_int, 5 * sizeof_int),
+                extent=c(5,5),
+                rowMaj=TRUE)
+B
+B[]
+atomdata(B)
+```
+
+
+```{r}
+B2 <- rbind(x, y)
+B2 <- B2[, 6:10, drop=NULL]
+B2
+B2[]
+atomdata(B2)
+```
+
+```{r}
+logz <- log2(z + 1)
+head(z)
+head(logz)
+z3 <- c(z, logz)
+```
+
+```{r}
+logz <- log2(z + 1)
+mean(z)
+mean(logz)
+```
+
